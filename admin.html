@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="box">
+  <h1>⚙ Admin Panel</h1>
+
+  <input id="name" placeholder="Item name">
+  <input id="value" placeholder="Value">
+
+  <button onclick="give()">Give Item</button>
+</div>
+
+<script>
+function give() {
+  const item = {
+    name: document.getElementById("name").value,
+    value: document.getElementById("value").value
+  };
+
+  let inv = JSON.parse(localStorage.getItem("inventory")) || [];
+  inv.push(item);
+  localStorage.setItem("inventory", JSON.stringify(inv));
+
+  alert("Item added!");
+}
+</script>
+
+</body>
+</html>
