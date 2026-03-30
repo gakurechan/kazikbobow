@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="box">
+  <h1>🎰 Casino Game</h1>
+
+  <p>Balance: <span id="bal"></span></p>
+
+  <button onclick="location.href='inventory.html'">Inventory</button>
+  <button onclick="location.href='match.html'">Match</button>
+  <button onclick="location.href='admin.html'">Admin</button>
+</div>
+
+<script>
+document.getElementById("bal").innerText =
+  localStorage.getItem("balance");
+</script>
+
+</body>
+</html>
