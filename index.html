@@ -1,0 +1,530 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1894.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;?php</p>
+<p class="p1">header('Expires: Sun, 01 Jan 2014 00:00:00 GMT');</p>
+<p class="p1">header('Cache-Control: no-store, no-cache, must-revalidate');</p>
+<p class="p1">header('Cache-Control: post-check=0, pre-check=0', FALSE);</p>
+<p class="p1">header('Pragma: no-cache');</p>
+<p class="p2"><br></p>
+<p class="p1">//Disable Including the File</p>
+<p class="p1">if (get_included_files()[0] != __FILE__) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
+<p class="p1">}</p>
+<p class="p1">?&gt;</p>
+<p class="p1">&lt;?php include "layout/head.php"; ?&gt;</p>
+<p class="p1">&lt;?php include_once "php/game_handler.php"; ?&gt;</p>
+<p class="p1">&lt;?php</p>
+<p class="p1">echo "&lt;div class='hidden'&gt;" . uniqid() . "&lt;/div&gt;";</p>
+<p class="p1">?&gt;</p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>function countDown(timestamp,selector) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let x = setInterval(function() {</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Get today's date and time</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var now = new Date().getTime();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Find the distance between now and the count down date</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var distance = timestamp - now;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Time calculations for days, hours, minutes and seconds</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>var seconds = Math.floor((distance % (1000 * 60)) / 1000);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Display the result in the element with id="demo"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>TimeRemaining = minutes + "m " + seconds + "s ";</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>TimeRemaining = "Ends in " + TimeRemaining</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>$(selector).text(TimeRemaining);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// If the count down is finished, write some text</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (distance &lt; 0) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>clearInterval(x);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>$(selector).text("Giveaway has Ended")</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>setTimeout(function () {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>$.ajax({</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>url: "./php/giveaway",</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>type: "POST",</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                                    </span>type: "check",</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}, Math.floor(Math.random() * 2000));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p1">&lt;div class="section" style="width:calc(100% - 20px);"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">    </span>$giveaways = getActiveGiveaways();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>$giveaways = $giveaways?$giveaways:[];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>foreach ($giveaways as $match) :</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$item_info = getItemInfo($match["item_id"]);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$joined = $session ? isJoined($match["giveaway_id"], $session["user_id"]) : false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$players = $conn-&gt;queryPrepared("SELECT COUNT(*) AS players FROM giveaways_participants WHERE giveaway_id = ?",[$match["giveaway_id"]])-&gt;fetch_assoc()["players"];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>//catch exception</p>
+<p class="p1"><span class="Apple-converted-space">        </span>catch(Exception $e) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$players = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>sendErrorEmbedWebhook("Problem Getting Joined Players in Giveaway",$e-&gt;getMessage());</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id='giveaway&lt;?php echo $match["giveaway_id"]; ?&gt;' class="row" style="justify-content:space-between;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;img src="&lt;?php echo $item_info["item_image"]; ?&gt;" width="80px" height="80px"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;flex-direction:column;align-items:center;flex: 0 0 auto;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style="font-size:1.5em;font-style:italic;font-weight:bold;"&gt;&lt;?php echo $item_info['display_name'] ?&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style="font-size:1.2em;color:gold;margin-top:-0.2em;"&gt;&lt;?php echo $item_info['item_value'] ? $item_info['item_value'] . " Value" : "Pending Valuation"; ?&gt;&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style="font-size:1.2em;color:lime;margin-top:-0.2em;" class="endtime"&gt;Ends in 10 Minutes&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;flex-direction:column;align-items:center;flex: 0 0 auto;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;span style="font-size:1.5em;font-style:italic;font-weight:bold;" class='numplayers'&gt;&lt;?php echo $players; ?&gt; Joined&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="btn btn-primary" &lt;?php echo $session?(($joined or $match['winner']) ? "disabled" : "onclick='joinGiveaway($match[giveaway_id])'"):"onclick='login()'"; ?&gt;;&gt;&lt;?php echo $match['winner'] ? "Ended" : ($session?($joined ? "Joined" : "Join"):"Log In"); ?&gt;&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>countDown(&lt;?php echo strtotime($match['enddate']); ?&gt; * 1000 , "#giveaway&lt;?php echo $match["giveaway_id"]; ?&gt; .endtime");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">    </span>endforeach;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id='gamesheader' class="row" style="justify-content:space-between;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="display:flex;gap:20px;align-items:center;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button onclick='&lt;?php echo $session ? "createMatch()" : "login()"; ?&gt;' class="btn-primary"&gt;Create Match&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php if ($session) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;h2 style="text-align:center;"&gt;Your Profit: &lt;?php echo getAllProfit($session["user_id"]); ?&gt;&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="display:flex;gap:20px;align-items:center;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php if ($session) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick='toggleMatches()' id='matchbtn' class="btn-secondary"&gt;My Matches&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if ($session) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$matches = getGames($session["user_id"]);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$matches = getGames("NULL");</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>foreach ($matches as $match) :</p>
+<p class="p1"><span class="Apple-converted-space">    </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id='game&lt;?php echo $match["game_id"]; ?&gt;' class="publicmatch row" style="justify-content:space-between;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;flex-direction:column;gap:10px;align-items:center;width:calc(100% - 100px);"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;width:100%;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;img src="&lt;?php echo $match["starter_side"] == 0 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" alt="&lt;?php echo $match["starter_side"] == 0 ? "Gem" : "Dog"; ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;img class="userthumb" src="&lt;?php echo getUserThumbnail($match["starter_id"]); ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div style="font-size:24px;"&gt;&lt;?php echo getName($match["starter_id"]); ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>foreach (json_decode($match["starter_items"], true) as $item) :</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;img src="&lt;?php echo getItemInfo($item["item_id"])["item_image"] ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;?php endforeach; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;?php if ($match["end_date"]) : ?&gt; &lt;div style="font-size:24px;"&gt;Value: &lt;?php echo $match["starter_value"]; ?&gt;&lt;/div&gt; &lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;width:100%;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;img src="&lt;?php echo $match["starter_side"] == 1 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" alt="&lt;?php echo $match["starter_side"] == 1 ? "Gem" : "Dog"; ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;?php if ($match["end_date"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;img class="userthumb" src="&lt;?php echo getUserThumbnail($match["player_id"]); ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div style="font-size:24px;"&gt;&lt;?php echo getName($match["player_id"]); ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>foreach (json_decode($match["player_items"], true) as $item) :</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                                </span>&lt;img src="&lt;?php echo getItemInfo($item["item_id"])["item_image"] ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;?php endforeach; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="font-size:24px;"&gt;Value: &lt;?php echo $match["player_value"]; ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;?php if (!$session) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick="login()" class="btn-primary"&gt;Join Match (&lt;?php echo $match["starter_value"] - 10 ?&gt; - &lt;?php echo $match["starter_value"] + 10 ?&gt;)&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;?php elseif ($match["starter_id"] != $session["user_id"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick='joinMatch(&lt;?php echo $match["game_id"] . "," . $match["starter_value"]; ?&gt;)' class="btn-primary"&gt;Join Match (&lt;?php echo $match["starter_value"] - 10 ?&gt; - &lt;?php echo $match["starter_value"] + 10 ?&gt;)&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick='cancelMatch(&lt;?php echo $match["game_id"]; ?&gt;)' class="btn-primary"&gt;Cancel Match&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php endif; ?&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div style="display:flex;flex-direction:column;text-align:center;padding-right:10px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php if (!$match["end_date"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Value &lt;br&gt;&lt;?php echo $match["starter_value"]; ?&gt;&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="color:cadetblue"&gt;(&lt;?php echo $match["starter_value"] - 10 &gt;= 10 ? $match["starter_value"] - 10 : 10; ?&gt; - &lt;?php echo $match["starter_value"] + 10; ?&gt;)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="coin &lt;?php echo $match["winner_side"] == 0 ? "red" : "blue"; ?&gt;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class='blue'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;img src="./img/dog.png" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class='red'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;img src="./img/gem.png" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;img style="border-radius:50%;" class="hidden" src="&lt;?php echo $match["winner_side"] == 0 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" width="80px" height="80px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php endif; ?&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;?php endforeach; ?&gt;</p>
+<p class="p1">&lt;?php</p>
+<p class="p1">if ($session) {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>$matches = getGames($session["user_id"], true);</p>
+<p class="p1">} else {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>$matches = [];</p>
+<p class="p1">}</p>
+<p class="p1">foreach ($matches as $match) :</p>
+<p class="p1">?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id='game&lt;?php echo $match["game_id"]; ?&gt;' class="mymatch row hidden" style="justify-content:space-around;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="display:flex;flex-direction:column;gap:10px;align-items:center;width:calc(100% - 100px);"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;width:100%;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;img src="&lt;?php echo $match["starter_side"] == 0 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" alt="&lt;?php echo $match["starter_side"] == 0 ? "Gem" : "Dog"; ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;img class="userthumb" src="&lt;?php echo getUserThumbnail($match["starter_id"]); ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="font-size:24px;"&gt;&lt;?php echo getName($match["starter_id"]); ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>foreach (json_decode($match["starter_items"], true) as $item) :</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;img src="&lt;?php echo getItemInfo($item["item_id"])["item_image"] ?&gt;" width="32px" height="32px" loading="lazy" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;?php endforeach; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;?php if ($match["end_date"]) : ?&gt; &lt;div style="font-size:24px;"&gt;Value: &lt;?php echo $match["starter_value"]; ?&gt;&lt;/div&gt; &lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between;width:100%;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;img src="&lt;?php echo $match["starter_side"] == 1 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" alt="&lt;?php echo $match["starter_side"] == 1 ? "Gem" : "Dog"; ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;?php if ($match["end_date"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;img class="userthumb" src="&lt;?php echo getUserThumbnail($match["player_id"]); ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div style="font-size:24px;"&gt;&lt;?php echo getName($match["player_id"]); ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;?php</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>$player_items = json_decode($match["player_items"], true);</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>if (!$player_items) {</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>$player_items = [];</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>foreach ($player_items as $item) :</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>&lt;img src="&lt;?php echo getItemInfo($item["item_id"])["item_image"] ?&gt;" width="32px" height="32px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;?php endforeach; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div style="font-size:24px;"&gt;Value: &lt;?php echo $match["player_value"]; ?&gt;&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php if (!$session) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick="login()" class="btn-primary"&gt;Join Match (&lt;?php echo $match["starter_value"] - 10 ?&gt; - &lt;?php echo $match["starter_value"] + 10 ?&gt;)&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php elseif ($match["starter_id"] != $session["user_id"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick='joinMatch(&lt;?php echo $match["game_id"] . "," . $match["starter_value"]; ?&gt;)' class="btn-primary"&gt;Join Match (&lt;?php echo $match["starter_value"] - 10 ?&gt; - &lt;?php echo $match["starter_value"] + 10 ?&gt;)&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;button onclick='cancelMatch(&lt;?php echo $match["game_id"]; ?&gt;)' class="btn-primary"&gt;Cancel Match&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;?php endif; ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1">&lt;?php endif; ?&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;div style="display:flex;flex-direction:column;text-align:center;padding-right:10px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php if (!$match["end_date"]) : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h2&gt;Value &lt;br&gt;&lt;?php echo $match["starter_value"]; ?&gt;&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div style="color:cadetblue"&gt;(&lt;?php echo $match["starter_value"] - 10; ?&gt; - &lt;?php echo $match["starter_value"] + 10; ?&gt;)&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php else : ?&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="coin &lt;?php echo $match["winner_side"] == 0 ? "red" : "blue"; ?&gt;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class='blue'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;img src="./img/dog.png" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class='red'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;img src="./img/gem.png" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;img style="border-radius:50%;" class="hidden" src="&lt;?php echo $match["winner_side"] == 0 ? "./img/gem.png" : "./img/dog.png"; ?&gt;" width="80px" height="80px" loading="lazy"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;?php endif; ?&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p1">&lt;?php endforeach; ?&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>value = 0</p>
+<p class="p1"><span class="Apple-converted-space">    </span>minval = 0</p>
+<p class="p1"><span class="Apple-converted-space">    </span>maxval = 0</p>
+<p class="p1"><span class="Apple-converted-space">    </span>items = []</p>
+<p class="p1"><span class="Apple-converted-space">    </span>publicmatches = true;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>gamesavail = true;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function toggleMatches() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#matchbtn").text($("#matchbtn").text() == "Active Matches" ? "My Matches" : "Active Matches");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$(".publicmatch").toggleClass("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$(".mymatch").toggleClass("hidden");</p>
+<p class="p1"><span class="Apple-converted-space">        </span>publicmatches = !publicmatches;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function cancelMatchOK(game_id) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowOutsideClick: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEscapeKey: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEnterKey: false</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.showLoading()</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$.ajax({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>url: "./php/game",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>type: "POST",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: "cancel",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>game_id: game_id</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>success: function(data) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data = JSON.parse(data)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Swal.close()</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (data.Error) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: "Error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: data.Error,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: "error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: "OK"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: 'Cancel Successful',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: 'Game has been Successfully Cancelled',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: 'success',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: 'OK'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}).then(function() {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>window.location.reload()</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function cancelMatch(game_id) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>title: 'Are you sure?',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text: "You are about to cancel this game!",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>icon: 'warning',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>showCancelButton: true,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>confirmButtonText: 'Yes, cancel it!'</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}).then((result) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (result.value) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cancelMatchOK(game_id)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function createMatchOK(side, items) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowOutsideClick: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEscapeKey: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEnterKey: false</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.showLoading()</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$.ajax({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>url: "./php/game",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>type: "POST",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: "create",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>side: side,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>item_ids: JSON.stringify(items)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>success: function(data) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data = JSON.parse(data)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Swal.close()</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (data.Error) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: "Error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: data.Error,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: "error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: "OK"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: 'Match Created',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: 'Game has been Successfully Created',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: 'success',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: 'OK'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}).then(function() {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>window.location.reload()</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function joinMatchOK(game_id, items) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowOutsideClick: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEscapeKey: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEnterKey: false</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.showLoading()</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$.ajax({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>url: "./php/game",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>type: "POST",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: "play",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>game_id: game_id,</p>
+<p class="p1"><span class="Apple-converted-space">                </span>item_ids: JSON.stringify(items)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>success: function(data) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data = JSON.parse(data)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (data.Error) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.close()</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: "Error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: data.Error,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: "error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: "OK"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><span class="Apple-converted-space">    </span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function joinGiveaway(id) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowOutsideClick: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEscapeKey: false,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>allowEnterKey: false</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.showLoading()</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$.ajax({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>url: "./php/giveaway",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>type: "POST",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>type: "join",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>giveaway_id: id,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>},</p>
+<p class="p1"><span class="Apple-converted-space">            </span>success: function(data) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>data = JSON.parse(data)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Swal.close()</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (data.Error) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: "Error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: data.Error,</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: "error",</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: "OK"</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>title: 'Match Created',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>text: 'You have joined this giveaway!',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>icon: 'success',</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>confirmButtonText: 'OK'</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}).then(function() {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>window.location.reload()</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>})</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function createMatch() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>value = 0</p>
+<p class="p1"><span class="Apple-converted-space">        </span>minval = 10</p>
+<p class="p1"><span class="Apple-converted-space">        </span>maxval = 0</p>
+<p class="p1"><span class="Apple-converted-space">        </span>items = []</p>
+<p class="p1"><span class="Apple-converted-space">        </span>togglePopup('selitem')</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#valheader").text("(Value must be greater than 10)")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#valdiv").text("Value: 0")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").attr("onclick", "createMatchside()")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").text("Choose Side")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").attr("disabled", true)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$(".selectionbtn").each(function() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).removeClass("btn-primary")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).addClass("btn-secondary")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).text("Select")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function joinMatch(game_id, val) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>value = 0</p>
+<p class="p1"><span class="Apple-converted-space">        </span>minval = val - 10</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (minval &lt; 10) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>minval = 10;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>maxval = val + 10</p>
+<p class="p1"><span class="Apple-converted-space">        </span>items = []</p>
+<p class="p1"><span class="Apple-converted-space">        </span>togglePopup('selitem')</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#valheader").text("(Value must be between " + minval + " and " + maxval + ")")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#valdiv").text("Value: 0")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").attr("onclick", "joinMatchconf(" + game_id + ")")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").text("Join Match")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#okbtn").attr("disabled", true)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$(".selectionbtn").each(function() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).removeClass("btn-primary")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).addClass("btn-secondary")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$(this).text("Select")</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function joinMatchconf(game_id) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>togglePopup('selitem')</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>title: 'Are you sure?',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text: "You are about to join this game!",</p>
+<p class="p1"><span class="Apple-converted-space">            </span>icon: 'warning',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>showCancelButton: true,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>confirmButtonText: 'Yes, join it!'</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}).then((result) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (result.value) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>joinMatchOK(game_id, items)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function addItem(invid, val) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (items.includes(invid)) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>items.splice(items.indexOf(invid), 1)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value = value - val</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$("#item" + invid + " .selectionbtn").each(function() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).removeClass("btn-primary")</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).addClass("btn-secondary")</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).text("Select")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (items.length &gt;= &lt;?php echo $maxGameItems ?&gt;) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Swal.fire("Error", "You can bet maximum of &lt;?php echo $maxGameItems ?&gt; items!", "error")</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>items.push(invid)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>value = value + val</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$("#item" + invid + " .selectionbtn").each(function() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).removeClass("btn-secondary")</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).addClass("btn-primary")</p>
+<p class="p1"><span class="Apple-converted-space">                </span>$(this).text("Unselect")</p>
+<p class="p1"><span class="Apple-converted-space">            </span>})</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>$("#valdiv").text("Value: " + value)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if ((value &gt;= minval || minval == 0) &amp;&amp; (value &lt;= maxval || maxval == 0)) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$("#okbtn").attr("disabled", false)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>$("#okbtn").attr("disabled", true)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function createMatchside() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>togglePopup('selitem')</p>
+<p class="p1"><span class="Apple-converted-space">        </span>Swal.fire({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>title: 'Choose a Side',</p>
+<p class="p1"><span class="Apple-converted-space">            </span>html: `&lt;div style='display:flex;justify-content:space-around;flex-wrap:wrap;gap:10px;'&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick='createMatchOK(0,items)' class="btn-primary"&gt;&lt;img src='./img/gem.png' width='100px' height='100px'&gt;Red&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;button onclick='createMatchOK(1,items)' class="btn-primary"&gt;&lt;img src='./img/dog.png' width='100px' height='100px'&gt;Blue&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;`,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>showCancelButton: true,</p>
+<p class="p1"><span class="Apple-converted-space">            </span>showConfirmButton: false,</p>
+<p class="p1"><span class="Apple-converted-space">        </span>})</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;?php include "layout/foot.php"; ?&gt;</p>
+</body>
+</html>
